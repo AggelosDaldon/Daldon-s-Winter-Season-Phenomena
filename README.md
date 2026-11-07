@@ -2,6 +2,12 @@
 
 An **independent weather and winter-phase mod** for Minecraft **Forge 1.20.1**, Java 17. Currently an experimental, work-in-progress prototype.
 
+## Test build 01 — Drizzle (0.1.1)
+
+Use `/daldon season set prewinter` followed by `/daldon event set drizzle` to freeze the event for visual testing. Stop it with `/daldon event set clear`. Set rain density with `/daldon drizzle density low` (default), `medium`, or `high`. Query with `/daldon drizzle status`. Each density choice is saved with the world and synchronized to multiplayer clients. This first test renders only vanilla-based falling water droplets and sparse ground splashes; it does **not** yet replace Minecraft's whole weather texture renderer or add any wind/rain looping audio.
+
+All drizzle effects are client-side and do not cause snow/ice generation or new chunks to be loaded.
+
 ## First prototype
 
 - Three saved, server-controlled phases: prewinter, freezing, winter.
@@ -35,6 +41,10 @@ All commands use the prefix /daldon. Changing states requires operator permissio
 | /daldon event auto | Resume random events |
 | /daldon event next | Start preselected next event |
 | /daldon event timer | Show preselected next event and countdown |
+| /daldon drizzle density low | Sparse drizzle (default) |
+| /daldon drizzle density medium | Slightly denser drizzle |
+| /daldon drizzle density high | Clearly visible test drizzle |
+| /daldon drizzle status | Show the active drizzle density |
 
 Available event IDs: clear, drizzle, rain, cloudy, thunderclouds, sleet, snow, blizzard.
 

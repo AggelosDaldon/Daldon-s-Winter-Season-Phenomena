@@ -8,6 +8,7 @@ public final class ClientWeatherState {
     public static WeatherKind next = WeatherKind.DRIZZLE;
     public static boolean seasonLocked = false;
     public static boolean weatherLocked = false;
+    public static int drizzleDensity = 1;
 
     private ClientWeatherState() {}
 
@@ -19,6 +20,7 @@ public final class ClientWeatherState {
         next = WeatherKind.from(message.next());
         seasonLocked = message.seasonLocked();
         weatherLocked = message.weatherLocked();
+        drizzleDensity = Math.max(1, Math.min(3, message.drizzleDensity()));
         Minecraft minecraft = Minecraft.getInstance();
         if (differentSeason && minecraft.levelRenderer != null) {
             // Forces chunk tint and grass colors to refresh when the season changes.
@@ -29,5 +31,6 @@ public final class ClientWeatherState {
         season = Season.PREWINTER;
         weather = WeatherKind.CLEAR;
         next = WeatherKind.DRIZZLE;
+        drizzleDensity = 1;
     }
 }

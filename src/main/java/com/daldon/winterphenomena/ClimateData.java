@@ -13,6 +13,8 @@ public final class ClimateData extends SavedData {
     public long nextWeatherTick = 0;
     public boolean seasonLocked = false;
     public boolean weatherLocked = false;
+    // Test presets: 1 = sparse, 2 = light, 3 = visible. Shared by all clients.
+    public int drizzleDensity = 1;
 
     public static ClimateData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
@@ -27,6 +29,7 @@ public final class ClimateData extends SavedData {
         d.nextWeatherTick = tag.getLong("nextWeatherTick");
         d.seasonLocked = tag.getBoolean("seasonLocked");
         d.weatherLocked = tag.getBoolean("weatherLocked");
+        d.drizzleDensity = Math.max(1, Math.min(3, tag.contains("drizzleDensity") ? tag.getInt("drizzleDensity") : 1));
         return d;
     }
     @Override
@@ -38,6 +41,7 @@ public final class ClimateData extends SavedData {
         tag.putLong("nextWeatherTick", nextWeatherTick);
         tag.putBoolean("seasonLocked", seasonLocked);
         tag.putBoolean("weatherLocked", weatherLocked);
+        tag.putInt("drizzleDensity", drizzleDensity);
         return tag;
     }
     public void ensureReady(long now, RandomSource rng) {

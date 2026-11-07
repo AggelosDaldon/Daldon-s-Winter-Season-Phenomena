@@ -31,10 +31,10 @@ public final class WeatherNetwork {
             new ClimateSync(ClimateData.get(player.getServer())));
     }
     public record ClimateSync(String season, String weather, String next, boolean seasonLocked,
-                              boolean weatherLocked, long nextEventTick, long now) {
+                              boolean weatherLocked, int drizzleDensity, long nextEventTick, long now) {
         public ClimateSync(ClimateData d) {
             this(d.season.id(), d.weather.id(), d.nextWeather.id(), d.seasonLocked,
-                 d.weatherLocked, d.nextWeatherTick, 0L);
+                 d.weatherLocked, d.drizzleDensity, d.nextWeatherTick, 0L);
         }
         public static void encode(ClimateSync p, FriendlyByteBuf b) {
             b.writeUtf(p.season);
@@ -42,12 +42,13 @@ public final class WeatherNetwork {
             b.writeUtf(p.next);
             b.writeBoolean(p.seasonLocked);
             b.writeBoolean(p.weatherLocked);
+            b.writeVarInt(p.drizzleDensity);
             b.writeLong(p.nextEventTick);
             b.writeLong(p.now);
         }
         public static ClimateSync decode(FriendlyByteBuf b) {
             return new ClimateSync(b.readUtf(), b.readUtf(), b.readUtf(),
-                b.readBoolean(), b.readBoolean(), b.readLong(), b.readLong());
+                b.readBoolean(), b.readBoolean(), b.readVarInt(), b.readLong(), b.readLong());
         }
         public static void handle(ClimateSync p, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,

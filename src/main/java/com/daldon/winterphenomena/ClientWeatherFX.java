@@ -31,7 +31,6 @@ public final class ClientWeatherFX {
 
         WeatherKind weather = ClientWeatherState.weather;
         int particles = switch (weather) {
-            case DRIZZLE -> 2;
             case SLEET -> 9;
             case SNOW -> 10;
             case BLIZZARD -> 22;
@@ -70,7 +69,7 @@ public final class ClientWeatherFX {
         float dim = switch (ClientWeatherState.weather) {
             case CLOUDY -> 0.22f;
             case THUNDERCLOUDS -> 0.49f;
-            case DRIZZLE -> 0.14f;
+            case DRIZZLE -> 0.075f;
             case RAIN -> 0.20f;
             case SLEET -> 0.29f;
             case SNOW -> 0.20f;

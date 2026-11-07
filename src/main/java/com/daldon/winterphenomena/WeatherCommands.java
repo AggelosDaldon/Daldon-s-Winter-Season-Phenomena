@@ -34,6 +34,20 @@ public final class WeatherCommands {
             }));
         }
 
+        var densitySet = Commands.literal("density").requires(s -> s.hasPermission(2));
+        for (int i = 1; i <= 3; i++) {
+            final int preset = i;
+            final String label = switch (i) { case 1 -> "low"; case 2 -> "medium"; default -> "high"; };
+            densitySet.then(Commands.literal(label).executes(ctx -> {
+                var server = ctx.getSource().getServer();
+                ClimateData data = ClimateData.get(server);
+                data.drizzleDensity = preset;
+                data.setDirty();
+                WeatherNetwork.broadcast(server);
+                return reply(ctx.getSource(), "Drizzle density set to " + label);
+            }));
+        }
+
         dispatcher.register(Commands.literal("daldon")
             .then(Commands.literal("status").executes(ctx -> status(ctx.getSource())))
             .then(Commands.literal("season")
@@ -50,6 +64,13 @@ public final class WeatherCommands {
                         WeatherNetwork.broadcast(ctx.getSource().getServer());
                         return reply(ctx.getSource(), "Season locked: " + data.seasonLocked);
                     }))))
+            .then(Commands.literal("drizzle")
+                .then(densitySet)
+                .then(Commands.literal("status").executes(ctx -> {
+                    int value = ClimateData.get(ctx.getSource().getServer()).drizzleDensity;
+                    return reply(ctx.getSource(), "Drizzle density: " +
+                        (value == 1 ? "low" : value == 2 ? "medium" : "high"));
+                })))
             .then(Commands.literal("event")
                 .then(eventSet)
                 .then(Commands.literal("timer").executes(ctx -> timer(ctx.getSource())))
