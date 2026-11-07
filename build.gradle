@@ -1,0 +1,44 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+group = 'com.daldon.winterphenomena'
+version = '0.1.0'
+base { archivesName = 'daldon-winter-season-phenomena' }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods { daldonweather { source sourceSets.main } }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods { daldonweather { source sourceSets.main } }
+        }
+    }
+}
+repositories { }
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+tasks.named('jar', Jar).configure {
+    manifest.attributes([
+       'Specification-Title': 'Daldons Winter Season Phenomena',
+       'Specification-Vendor': 'Daldon',
+       'Implementation-Title': project.name,
+       'Implementation-Version': project.version
+    ])
+    finalizedBy 'reobfJar'
+}
