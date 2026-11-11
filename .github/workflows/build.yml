@@ -3,6 +3,11 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+# Cancel superseded builds on any branch to keep only the newest attempt.
+concurrency:
+  group: daldon-forge-build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
