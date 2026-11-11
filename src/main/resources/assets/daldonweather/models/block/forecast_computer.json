@@ -1,10 +1,10 @@
 {
   "textures": {
     "screen": "minecraft:block/black_concrete",
-    "case": "minecraft:block/smooth_sandstone",
-    "key": "minecraft:block/iron_block"
+    "case": "minecraft:block/sandstone",
+    "key": "minecraft:block/iron_block",
+    "particle": "minecraft:block/sandstone"
   },
-  "render_type": "minecraft:cutout",
   "elements": [
     {
       "from": [
@@ -19,22 +19,58 @@
       ],
       "faces": {
         "north": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "south": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "east": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "west": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "up": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "down": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         }
       }
     },
@@ -51,22 +87,58 @@
       ],
       "faces": {
         "north": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "south": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "east": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "west": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "up": {
-          "texture": "#key"
+          "texture": "#key",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "down": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         }
       }
     },
@@ -83,22 +155,58 @@
       ],
       "faces": {
         "north": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "south": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "east": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "west": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "up": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "down": {
-          "texture": "#case"
+          "texture": "#case",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         }
       }
     },
@@ -115,7 +223,13 @@
       ],
       "faces": {
         "south": {
-          "texture": "#screen"
+          "texture": "#screen",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         }
       }
     }
