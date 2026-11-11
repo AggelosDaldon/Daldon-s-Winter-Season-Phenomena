@@ -1,16 +1,20 @@
 name: Forge 1.20.1 Build
 on:
   push:
-  pull_request:
+    branches: [main]
   workflow_dispatch:
-# Cancel superseded builds on any branch to keep only the newest attempt.
+
+permissions:
+  contents: write
+
 concurrency:
-  group: daldon-forge-build
+  group: daldon-forge-release
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -20,10 +24,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.8'
+          cache-disabled: true
       - name: Build mod
-        run: gradle build --stacktrace
-      - uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: daldon-winter-season-phenomena-forge-1.20.1
-          path: build/libs/*.jar
+        run: gradle --no-daemon build --stacktrace
+      - name: Publish JAR to GitHub Releases (no artifact service)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHORT_SHA="${GITHUB_SHA:0:8}"
+          TAG="test-${SHORT_SHA}"
+          JAR=$(find build/libs -maxdepth 1 -name '*.jar' ! -name '*sources*' ! -name '*dev*' | head -1)
+          test -n "$JAR"
+          echo "Publishing $JAR as $TAG"
+          gh release create "$TAG" "$JAR" --target "$GITHUB_SHA" --title "Daldon Weather test build $SHORT_SHA" --notes "Automated Forge 1.20.1 JAR build. Experimental version: test on a backup world." --prerelease
