@@ -31,23 +31,24 @@ public final class ClientWeatherFX {
 
         WeatherKind weather = ClientWeatherState.weather;
         int particles = switch (weather) {
-            case SLEET -> 9;
-            case SNOW -> 10;
-            case BLIZZARD -> 22;
+            case SLEET -> 28;
+            case SNOW -> 24;
+            case BLIZZARD -> 48;
             default -> 0;
         };
 
         RandomSource random = level.random;
         for (int i = 0; i < particles; i++) {
-            double x = game.player.getX() + random.nextInt(31) - 15 + random.nextDouble();
-            double y = game.player.getY() + 5 + random.nextInt(11);
-            double z = game.player.getZ() + random.nextInt(31) - 15 + random.nextDouble();
-            if (!level.canSeeSky(BlockPos.containing(x, y, z))) continue;
+            double x = game.player.getX() + random.nextInt(21) - 10 + random.nextDouble();
+            double y = game.player.getY() + 3 + random.nextInt(11);
+            double z = game.player.getZ() + random.nextInt(21) - 10 + random.nextDouble();
+            if (!level.canSeeSky(BlockPos.containing(x, y, z)) || !level.getBlockState(BlockPos.containing(x, y, z)).isAir()) continue;
             boolean snow = weather == WeatherKind.SNOW || weather == WeatherKind.BLIZZARD
                 || (weather == WeatherKind.SLEET && i % 2 == 0);
             level.addParticle(snow ? ParticleTypes.SNOWFLAKE : ParticleTypes.FALLING_WATER,
                 x, y, z,
-                weather == WeatherKind.BLIZZARD ? 0.035 : 0.005, -0.03, 0);
+                weather == WeatherKind.BLIZZARD ? 0.065 : 0.005,
+                snow ? -0.045 : -0.20, 0);
         }
 
         // Tiny floating snow flecks all winter, even under an otherwise clear sky.
@@ -67,11 +68,11 @@ public final class ClientWeatherFX {
         if (event.getCamera().getFluidInCamera() != FogType.NONE) return;
 
         float dim = switch (ClientWeatherState.weather) {
-            case CLOUDY -> 0.22f;
-            case THUNDERCLOUDS -> 0.49f;
+            case CLOUDY -> 0.42f;
+            case THUNDERCLOUDS -> 0.78f;
             case DRIZZLE -> 0.075f;
             case RAIN -> 0.20f;
-            case SLEET -> 0.29f;
+            case SLEET -> 0.43f;
             case SNOW -> 0.20f;
             case BLIZZARD -> 0.44f;
             default -> 0.0f;

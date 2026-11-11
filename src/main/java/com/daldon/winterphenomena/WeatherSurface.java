@@ -1,8 +1,8 @@
 package com.daldon.winterphenomena;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,19 +14,26 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
- * Bounded, server-only overworld surface updates. Never loads unvisited chunks
- * or mutates the biome registry / world generation settings.
+ * A world-wide CLIMATE, not a player-radius climate.
+ *
+ * Every FULL overworld chunk queues when loaded (including newly generated
+ * chunks); all loaded chunks in player view are reconsidered after a climate
+ * transition. We never load chunks just to modify them, and never rewrite
+ * biome source / worldgen settings. A chunk newly explored under winter
+ * receives the same snow policy as a previously explored chunk.
  */
 public final class WeatherSurface {
-    private static final int MAX_COLUMNS_PER_TICK = 256;
-    private static final ConcurrentLinkedQueue<ChunkJob> QUEUE = new ConcurrentLinkedQueue<>();
-    private static final Set<Long> PENDING = ConcurrentHashMap.newKeySet();
+    // Bounded per-server tick: 8 complete chunk-columns worth. No delayed
+    // repeated visits to just the player's 3x3 neighborhood.
+    private static final int MAX_COLUMNS_PER_TICK = 2048;
+    private static final int ACTIVE_VIEW_RADIUS = 8;
+    private static final ArrayDeque<ChunkJob> QUEUE = new ArrayDeque<>();
+    private static final Set<Long> PENDING = new HashSet<>();
 
     private WeatherSurface() {}
 
     public static void queue(ChunkPos pos) {
-        long key = pos.toLong();
-        if (PENDING.add(key)) QUEUE.add(new ChunkJob(pos));
+        if (PENDING.add(pos.toLong())) QUEUE.addLast(new ChunkJob(pos));
     }
 
     public static void reset() {
@@ -34,41 +41,52 @@ public final class WeatherSurface {
         PENDING.clear();
     }
 
-    public static void tick(ServerLevel level, ClimateData climate) {
-        if (level.dimension() != Level.OVERWORLD) return;
-
-        if (level.getGameTime() % 60L == 0L) {
-            for (ServerPlayer player : level.players()) {
-                ChunkPos origin = player.chunkPosition();
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        queue(new ChunkPos(origin.x + dx, origin.z + dz));
+    /** Rescan all currently loaded chunks around all players after season/event change. */
+    public static void rescanVisible(ServerLevel level) {
+        for (ServerPlayer player : level.players()) {
+            ChunkPos current = player.chunkPosition();
+            for (int distance = 0; distance <= ACTIVE_VIEW_RADIUS; distance++) {
+                for (int dx = -distance; dx <= distance; dx++) {
+                    for (int dz = -distance; dz <= distance; dz++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dz)) != distance) continue;
+                        int cx = current.x + dx;
+                        int cz = current.z + dz;
+                        if (level.hasChunk(cx, cz)) queue(new ChunkPos(cx, cz));
                     }
                 }
             }
         }
+    }
+
+    public static void tick(ServerLevel level, ClimateData climate) {
+        if (level.dimension() != Level.OVERWORLD) return;
+
+        // Weather keeps evolving throughout loaded terrain instead of
+        // repeatedly spending every update only on nearby 3x3 chunks.
+        if (level.getGameTime() % 120 == 0) rescanVisible(level);
 
         int remaining = MAX_COLUMNS_PER_TICK;
-        while (remaining > 0) {
-            ChunkJob job = QUEUE.peek();
-            if (job == null) return;
+        while (remaining > 0 && !QUEUE.isEmpty()) {
+            ChunkJob job = QUEUE.peekFirst();
             if (!level.hasChunk(job.pos.x, job.pos.z)) {
-                QUEUE.poll();
-                PENDING.remove(job.pos.toLong());
+                finish(job);
                 continue;
             }
-            int amount = Math.min(remaining, 256 - job.column);
-            for (int i = 0; i < amount; i++) {
+            int count = Math.min(256 - job.column, remaining);
+            for (int i = 0; i < count; i++) {
                 int index = job.column++;
-                processColumn(level, climate, job.pos.getMinBlockX() + (index & 15),
-                    job.pos.getMinBlockZ() + (index >> 4));
+                processColumn(level, climate,
+                    job.pos.getMinBlockX() + (index & 15),
+                    job.pos.getMinBlockZ() + (index >>> 4));
             }
-            remaining -= amount;
-            if (job.column >= 256) {
-                QUEUE.poll();
-                PENDING.remove(job.pos.toLong());
-            }
+            remaining -= count;
+            if (job.column >= 256) finish(job);
         }
+    }
+
+    private static void finish(ChunkJob job) {
+        QUEUE.removeFirst();
+        PENDING.remove(job.pos.toLong());
     }
 
     private static void processColumn(ServerLevel level, ClimateData climate, int x, int z) {
@@ -80,41 +98,50 @@ public final class WeatherSurface {
         BlockState existing = level.getBlockState(ground);
         boolean winter = climate.season == Season.WINTER;
         boolean freezing = climate.season == Season.FREEZING;
-        boolean snowing = climate.weather == WeatherKind.SNOW ||
+        boolean precipitation = climate.weather == WeatherKind.SNOW ||
             climate.weather == WeatherKind.BLIZZARD || climate.weather == WeatherKind.SLEET;
         boolean thawing = climate.season == Season.PREWINTER ||
+            climate.weather == WeatherKind.THAW ||
             (freezing && climate.weather == WeatherKind.CLEAR);
+        boolean snowCover = !thawing && (winter || (freezing && precipitation));
+        boolean freezeWater = !thawing && (winter || freezing);
 
-        // Remove only our temporary layers; preserve all original snow.
+        // Existing weather-created snow: melt or grow one layer at a time.
+        // Vanilla natural snow and player-placed snow are never touched.
         if (existing.is(WeatherBlocks.SEASONAL_SNOW.get())) {
-            if (thawing && level.random.nextInt(freezing ? 10 : 3) == 0) {
-                int layers = existing.getValue(SnowLayerBlock.LAYERS);
-                level.setBlock(ground, layers <= 1 ? Blocks.AIR.defaultBlockState()
-                    : existing.setValue(SnowLayerBlock.LAYERS, layers - 1), 3);
-            } else if (snowing && level.random.nextInt(3) == 0) {
-                int layers = existing.getValue(SnowLayerBlock.LAYERS);
-                int cap = winter ? 6 : 2;
-                if (layers < cap) level.setBlock(ground,
-                    existing.setValue(SnowLayerBlock.LAYERS, layers + 1), 3);
+            int layers = existing.getValue(SnowLayerBlock.LAYERS);
+            if (thawing) {
+                // Freshly generated chunks in thawing weather are immediately
+                // free of our snow; previously accumulated snow melts by layers.
+                int next = Math.max(0, layers - (climate.weather == WeatherKind.THAW ? 2 : 1));
+                level.setBlock(ground, next == 0 ? Blocks.AIR.defaultBlockState()
+                    : existing.setValue(SnowLayerBlock.LAYERS, next), 3);
+            } else if (snowCover && precipitation && layers < (winter ? 7 : 2)
+                && level.random.nextInt(2) == 0) {
+                level.setBlock(ground, existing.setValue(SnowLayerBlock.LAYERS, layers + 1), 3);
             }
             return;
         }
 
+        // Only our ice changes back into water. Vanilla ice is left alone.
         if (existing.is(WeatherBlocks.SEASONAL_ICE.get())) {
-            if (thawing && level.random.nextInt(freezing ? 15 : 4) == 0) {
-                level.setBlock(ground, Blocks.WATER.defaultBlockState(), 3);
-            }
+            if (thawing) level.setBlock(ground, Blocks.WATER.defaultBlockState(), 3);
             return;
         }
 
-        if ((winter || freezing) && existing.is(Blocks.WATER) &&
-                existing.getFluidState().isSource() && level.random.nextInt(winter ? 2 : 12) == 0) {
+        if (freezeWater && existing.is(Blocks.WATER)
+            && existing.getFluidState().isSource()
+            && level.random.nextInt(winter ? 2 : 7) == 0) {
             level.setBlock(ground, WeatherBlocks.SEASONAL_ICE.get().defaultBlockState(), 3);
             return;
         }
 
-        if (!(winter || freezing) || !level.isEmptyBlock(air)) return;
-        int chance = winter ? (snowing ? 2 : 7) : (snowing ? 12 : 80);
+        if (!snowCover || !level.isEmptyBlock(air)) return;
+
+        // In winter an untouched/newly generated region becomes snowy as soon
+        // as its chunk is processed, even if the player has never visited it.
+        // During freezing, visible patches only form in precipitation events.
+        int chance = winter ? 1 : 3;
         if (level.random.nextInt(chance) != 0) return;
         BlockState layer = WeatherBlocks.SEASONAL_SNOW.get().defaultBlockState();
         if (layer.canSurvive(level, air)) level.setBlock(air, layer, 3);
@@ -122,7 +149,7 @@ public final class WeatherSurface {
 
     private static final class ChunkJob {
         final ChunkPos pos;
-        int column = 0;
+        int column;
         ChunkJob(ChunkPos pos) { this.pos = pos; }
     }
 }

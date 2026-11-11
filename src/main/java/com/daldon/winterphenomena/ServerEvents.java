@@ -31,7 +31,8 @@ public final class ServerEvents {
 
     @SubscribeEvent
     public static void chunkLoad(ChunkEvent.Load event) {
-        // Do not access blocks during ChunkEvent.Load: the chunk may not be FULL yet.
+        // Queue every loaded chunk; actual block updates happen later on server tick.
+        // No fixed player radius and no forced chunk generation.
         if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
             WeatherSurface.queue(event.getChunk().getPos());
         }

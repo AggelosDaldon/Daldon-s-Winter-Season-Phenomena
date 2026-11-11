@@ -49,6 +49,16 @@ public final class WeatherCommands {
         }
 
         dispatcher.register(Commands.literal("daldon")
+            .then(Commands.literal("clear").requires(s -> s.hasPermission(2))
+                .executes(ctx -> {
+                    var server = ctx.getSource().getServer();
+                    ClimateData data = ClimateData.get(server);
+                    data.setWeather(WeatherKind.CLEAR, server.overworld().getGameTime(), server.overworld().random);
+                    data.weatherLocked = true;
+                    data.setDirty();
+                    ClimateEngine.changed(server);
+                    return reply(ctx.getSource(), "Sky cleared; current season unchanged. /daldon event auto to resume");
+                }))
             .then(Commands.literal("status").executes(ctx -> status(ctx.getSource())))
             .then(Commands.literal("season")
                 .then(seasonSet)

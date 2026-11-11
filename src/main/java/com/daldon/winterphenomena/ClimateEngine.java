@@ -63,18 +63,15 @@ public final class ClimateEngine {
     public static void changed(MinecraftServer server) {
         ClimateData data = ClimateData.get(server);
         ServerLevel level = server.overworld();
-        // Only full rain uses vanilla rainfall. All other types have custom visuals.
-        boolean vanillaRain = data.weather == WeatherKind.RAIN;
-        level.setWeatherParameters(0, 24000, vanillaRain, false);
+        // Minecraft darkens cloud textures only for a real vanilla storm.
+        // Thunderclouds use that renderer so their clouds are dark, while
+        // our custom sleet/snow particles work independently of local biomes.
+        boolean vanillaRain = data.weather == WeatherKind.RAIN ||
+            data.weather == WeatherKind.THUNDERCLOUDS;
+        boolean vanillaThunder = data.weather == WeatherKind.THUNDERCLOUDS;
+        level.setWeatherParameters(0, 24000, vanillaRain, vanillaThunder);
         WeatherNetwork.broadcast(server);
-        for (ServerPlayer player : level.players()) {
-            net.minecraft.world.level.ChunkPos c = player.chunkPosition();
-            for (int x = -2; x <= 2; x++) {
-                for (int z = -2; z <= 2; z++) {
-                    WeatherSurface.queue(new net.minecraft.world.level.ChunkPos(c.x + x, c.z + z));
-                }
-            }
-        }
+        WeatherSurface.rescanVisible(level);
     }
     public static void stopped() {
         previousServer = null;

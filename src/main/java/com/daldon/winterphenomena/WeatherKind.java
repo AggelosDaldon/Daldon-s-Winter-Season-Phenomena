@@ -4,7 +4,7 @@ import java.util.Locale;
 import net.minecraft.util.RandomSource;
 
 public enum WeatherKind {
-    CLEAR, DRIZZLE, RAIN, CLOUDY, THUNDERCLOUDS, SLEET, SNOW, BLIZZARD;
+    CLEAR, DRIZZLE, RAIN, CLOUDY, THUNDERCLOUDS, SLEET, SNOW, BLIZZARD, THAW;
 
     public String id() { return name().toLowerCase(Locale.ROOT); }
     public static WeatherKind from(String id) {
@@ -21,11 +21,11 @@ public enum WeatherKind {
             };
             case FREEZING -> new WeatherKind[] {
                 CLEAR, CLOUDY, CLOUDY, DRIZZLE, SLEET, SLEET,
-                SNOW, SNOW, THUNDERCLOUDS
+                SNOW, SNOW, THAW, THUNDERCLOUDS
             };
             case WINTER -> new WeatherKind[] {
                 CLEAR, CLOUDY, CLOUDY, SLEET, SNOW, SNOW, SNOW,
-                BLIZZARD, BLIZZARD, THUNDERCLOUDS
+                BLIZZARD, BLIZZARD, THAW, THUNDERCLOUDS
             };
         };
         return pool[rng.nextInt(pool.length)];
