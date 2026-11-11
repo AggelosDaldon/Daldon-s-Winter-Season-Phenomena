@@ -1,6 +1,24 @@
-# Daldon's Winter Season Phenomena — v0.2.1 experimental
+# Daldon's Winter Season Phenomena — v0.2.3 experimental
 
 Minecraft Forge 1.20.1 / Java 17. Always test on a backup world.
+
+## v0.2.3 — Season-safe weather / darkness / continuous audio
+
+- Weather event **and** season are authoritative world-level data.
+- Vanilla rain-driven sky darkening is enabled for overcast events; a small client-only mixin cancels vanilla rain rendering and rain splash sounds during custom dry/winter weather. Minecraft vanilla rain and prewinter thunderstorms remain rendered normally.
+- The client receives the same weather event for the whole Overworld; visual droplets/snowflakes are rendered relative to each player's camera as in vanilla.
+- Continuous looped sound instances replace repeated short sounds. Snow and cloudy weather use soft wind-like Minecraft ambient sound instead of rain.
+- The season/event matrix is validated in commands, scheduling, and when loading older saves.
+
+| Season | Allowed events |
+|---|---|
+| PREWINTER | clear, drizzle, rain (vanilla), cloudy, thunderclouds (vanilla storm), hail |
+| FREEZING | clear, cloudy, thunderclouds, sleet, snow, hail, thaw |
+| WINTER | clear, cloudy, thunderclouds, sleet, snow, blizzard, hail, thaw |
+
+Commands such as `/daldon event set rain` in WINTER now return an error. `/daldon season set winter` starts snowfall. `/daldon event auto` restores the season-specific weather cycle. `/daldon clear` stops precipitation without switching the season.
+
+**Build/runtime note:** This change adds a Mixin into Minecraft's LevelRenderer to separate sky darkness from actual rain geometry. Verify on Forge 1.20.1 without shaders first, then test with the full pack. Mod conflicts in the rendering pipeline remain possible. A successful compilation alone is not sufficient runtime verification.
 
 ## How it works
 
