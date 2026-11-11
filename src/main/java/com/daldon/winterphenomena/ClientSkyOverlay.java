@@ -57,24 +57,25 @@ public final class ClientSkyOverlay {
         // so physical terrain rendered afterward is not obscured.
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
-        // Minecraft's weather/cloud visual rendering is camera-relative.
-        pose.translate(mc.gameRenderer.getMainCamera().getPosition().x,
-            mc.gameRenderer.getMainCamera().getPosition().y,
-            mc.gameRenderer.getMainCamera().getPosition().z);
+        // Event matrices are already camera-relative. Translating them by the
+        // camera coordinates again pushed the overcast deck out of view.
+        // Keep the cloud sheet at a consistent height above the camera.
+        // The sheets are centered on the viewer and extend beyond the near particle field.
         Matrix4f mat = pose.last().pose();
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.depthMask(false);
+        RenderSystem.disableCull();
         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
 
         // Darkened upper sky base, tiled translucent cloud banks.
         // Two layers increase the impression of rolling overcast skies.
         for (int layer = 0; layer < 2; layer++) {
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            float height = layer == 0 ? 105f : 117f;
-            int alphaBase = Math.round(110f * strength);
+            float height = (float)(layer == 0 ? 64.0 : 78.0);
+            int alphaBase = Math.round(175f * strength);
             for (int x = -5; x <= 5; x++) {
                 for (int z = -5; z <= 5; z++) {
                     int noise = Math.floorMod(x * 37 + z * 59 + layer * 83, 13);
@@ -91,6 +92,7 @@ public final class ClientSkyOverlay {
             }
             BufferUploader.drawWithShader(buffer.end());
         }
+        RenderSystem.enableCull();
         RenderSystem.depthMask(true);
         RenderSystem.disableBlend();
         pose.popPose();
