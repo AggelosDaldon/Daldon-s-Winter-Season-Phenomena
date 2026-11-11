@@ -4,6 +4,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FogType;
@@ -31,26 +33,47 @@ public final class ClientWeatherFX {
 
         WeatherKind weather = ClientWeatherState.weather;
         int particles = switch (weather) {
-            case SLEET -> 28;
-            case SNOW -> 24;
-            case BLIZZARD -> 48;
+            case SLEET -> 38;
+            case SNOW -> 45;
+            case BLIZZARD -> 120;
+            case HAIL -> 85;
             default -> 0;
         };
 
         RandomSource random = level.random;
         for (int i = 0; i < particles; i++) {
-            double x = game.player.getX() + random.nextInt(21) - 10 + random.nextDouble();
+            double x = game.player.getX() + random.nextInt(41) - 20 + random.nextDouble();
             double y = game.player.getY() + 3 + random.nextInt(11);
-            double z = game.player.getZ() + random.nextInt(21) - 10 + random.nextDouble();
+            double z = game.player.getZ() + random.nextInt(41) - 20 + random.nextDouble();
             if (!level.canSeeSky(BlockPos.containing(x, y, z)) || !level.getBlockState(BlockPos.containing(x, y, z)).isAir()) continue;
             boolean snow = weather == WeatherKind.SNOW || weather == WeatherKind.BLIZZARD
                 || (weather == WeatherKind.SLEET && i % 2 == 0);
-            level.addParticle(snow ? ParticleTypes.SNOWFLAKE : ParticleTypes.FALLING_WATER,
+            boolean hail = weather == WeatherKind.HAIL;
+            level.addParticle(hail ? ParticleTypes.ITEM_SNOWBALL :
+                    snow ? ParticleTypes.SNOWFLAKE : ParticleTypes.FALLING_WATER,
                 x, y, z,
-                weather == WeatherKind.BLIZZARD ? 0.065 : 0.005,
-                snow ? -0.045 : -0.20, 0);
+                weather == WeatherKind.BLIZZARD ? 0.26 : 0.005,
+                weather == WeatherKind.BLIZZARD ? -0.34 :
+                    hail ? -0.48 : snow ? -0.085 : -0.20, 0.0);
         }
 
+        // Play weather ambience locally, but the event itself is universal
+        // and synced from the server. Vanilla source audio is redistributable
+        // through Minecraft rather than copying sound files from other mods.
+        if (level.getGameTime() % 120 == 0) {
+            var pos = game.player.position();
+            if (weather == WeatherKind.BLIZZARD || weather == WeatherKind.THUNDERCLOUDS) {
+                level.playLocalSound(pos.x, pos.y, pos.z,
+                    SoundEvents.AMBIENT_SOUL_SAND_VALLEY_LOOP, SoundSource.WEATHER,
+                    weather == WeatherKind.BLIZZARD ? 0.60f : 0.35f,
+                    weather == WeatherKind.BLIZZARD ? 0.77f : 0.90f, false);
+            } else if (weather == WeatherKind.SLEET || weather == WeatherKind.HAIL ||
+                       weather == WeatherKind.SNOW) {
+                level.playLocalSound(pos.x, pos.y, pos.z, SoundEvents.WEATHER_RAIN,
+                    SoundSource.WEATHER, weather == WeatherKind.HAIL ? 0.36f : 0.16f,
+                    weather == WeatherKind.HAIL ? 1.45f : 0.80f, false);
+            }
+        }
         // Tiny floating snow flecks all winter, even under an otherwise clear sky.
         if (ClientWeatherState.season == Season.WINTER && random.nextInt(3) == 0) {
             double x = game.player.getX() + random.nextInt(23) - 11;
@@ -74,13 +97,20 @@ public final class ClientWeatherFX {
             case RAIN -> 0.20f;
             case SLEET -> 0.43f;
             case SNOW -> 0.20f;
-            case BLIZZARD -> 0.44f;
+            case BLIZZARD -> 0.62f;
+            case HAIL -> 0.64f;
             default -> 0.0f;
         };
         // Original cool, desaturated winter atmosphere; not an imported biome shader.
-        float redTarget = ClientWeatherState.season == Season.WINTER ? 0.60f : 0.62f;
-        float greenTarget = ClientWeatherState.season == Season.WINTER ? 0.67f : 0.68f;
-        float blueTarget = ClientWeatherState.season == Season.WINTER ? 0.75f : 0.73f;
+        float redTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
+            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.15f :
+            ClientWeatherState.season == Season.WINTER ? 0.60f : 0.62f;
+        float greenTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
+            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.18f :
+            ClientWeatherState.season == Season.WINTER ? 0.67f : 0.68f;
+        float blueTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
+            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.24f :
+            ClientWeatherState.season == Season.WINTER ? 0.75f : 0.73f;
         if (ClientWeatherState.season == Season.WINTER) dim = Math.min(0.66f, dim + 0.08f);
         event.setRed(lerp(event.getRed(), redTarget, dim));
         event.setGreen(lerp(event.getGreen(), greenTarget, dim));
