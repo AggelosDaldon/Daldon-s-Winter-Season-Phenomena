@@ -1,9 +1,9 @@
 {
   "textures": {
-    "screen": "minecraft:block/black_concrete",
-    "case": "minecraft:block/sandstone",
-    "key": "minecraft:block/iron_block",
-    "particle": "minecraft:block/sandstone"
+    "screen": "daldonweather:block/computer_screen",
+    "case": "daldonweather:block/computer_case",
+    "key": "daldonweather:block/computer_keyboard",
+    "particle": "daldonweather:block/computer_case"
   },
   "elements": [
     {
