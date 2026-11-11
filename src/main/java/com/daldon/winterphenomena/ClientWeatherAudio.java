@@ -19,8 +19,8 @@ public final class ClientWeatherAudio {
 
     public static void tick(Minecraft minecraft, WeatherKind current) {
         SoundEvent nextSound = switch (current) {
-            case DRIZZLE, RAIN, SLEET, SNOW, HAIL -> SoundEvents.WEATHER_RAIN;
-            case BLIZZARD, THUNDERCLOUDS -> SoundEvents.AMBIENT_SOUL_SAND_VALLEY_LOOP.value();
+            case DRIZZLE, RAIN, SLEET, HAIL -> SoundEvents.WEATHER_RAIN;
+            case CLOUDY, SNOW, BLIZZARD, THUNDERCLOUDS -> SoundEvents.AMBIENT_SOUL_SAND_VALLEY_LOOP.value();
             default -> null;
         };
         if (nextSound == null) {
@@ -34,7 +34,8 @@ public final class ClientWeatherAudio {
             kind = current;
             float volume = switch (current) {
                 case DRIZZLE -> .12f;
-                case SNOW -> .10f;
+                case CLOUDY -> .09f;
+                case SNOW -> .13f;
                 case SLEET -> .22f;
                 case HAIL -> .43f;
                 case BLIZZARD -> .62f;
