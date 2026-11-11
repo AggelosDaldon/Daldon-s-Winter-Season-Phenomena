@@ -28,9 +28,9 @@ public final class ForecastComputerRenderer implements BlockEntityRenderer<Forec
         if (!state.hasProperty(ForecastComputerBlock.FACING)) return;
 
         pose.pushPose();
-        pose.translate(0.5, 0.70, 0.5);
+        pose.translate(0.5, 0.64, 0.5);
         pose.mulPose(Axis.YP.rotationDegrees(-state.getValue(ForecastComputerBlock.FACING).toYRot()));
-        pose.translate(0, 0, 0.506);
+        pose.translate(0, 0, 0.326);
         pose.scale(0.0068f, -0.0068f, 0.0068f);
 
         String[] lines = {
