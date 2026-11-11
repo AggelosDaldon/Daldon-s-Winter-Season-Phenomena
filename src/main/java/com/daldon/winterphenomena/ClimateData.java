@@ -57,9 +57,17 @@ public final class ClimateData extends SavedData {
     }
     public void setSeason(Season value, long now, RandomSource rng) {
         season = value;
+        // Moving into winter starts a worldwide snow event, not immediate snow cover.
+        // During freezing use sleet; prewinter clears precipitation.
+        if (!weatherLocked) {
+            weather = switch (value) {
+                case PREWINTER -> WeatherKind.CLEAR;
+                case FREEZING -> WeatherKind.SLEET;
+                case WINTER -> WeatherKind.SNOW;
+            };
+        }
         nextSeasonTick = now + season.durationTicks;
         if (!weatherLocked) {
-            weather = WeatherKind.choose(season, rng);
             scheduleWeather(now, rng);
         }
         setDirty();

@@ -38,6 +38,17 @@ public final class ClimateEngine {
         if (changed) changed(server);
 
         WeatherSurface.tick(level, data);
+        // Real gameplay effects are applied on the server, independent of
+        // camera or particle settings.
+        if (data.weather == WeatherKind.HAIL && time % 60 == 0) {
+            for (ServerPlayer player : level.players()) {
+                BlockPos top = player.blockPosition().above();
+                if (!player.isSpectator() && !player.isCreative()
+                    && level.canSeeSky(top)) {
+                    player.hurt(level.damageSources().generic(), 1.0F);
+                }
+            }
+        }
 
         // Cloud-only thunder has visible, harmless lightning without rainfall.
         if (data.weather == WeatherKind.THUNDERCLOUDS && time % 80 == 0) {

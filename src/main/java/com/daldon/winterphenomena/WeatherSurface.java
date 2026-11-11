@@ -25,7 +25,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 public final class WeatherSurface {
     // Bounded per-server tick: 8 complete chunk-columns worth. No delayed
     // repeated visits to just the player's 3x3 neighborhood.
-    private static final int MAX_COLUMNS_PER_TICK = 2048;
+    private static final int MAX_COLUMNS_PER_TICK = 768;
     private static final int ACTIVE_VIEW_RADIUS = 8;
     private static final ArrayDeque<ChunkJob> QUEUE = new ArrayDeque<>();
     private static final Set<Long> PENDING = new HashSet<>();
@@ -63,7 +63,7 @@ public final class WeatherSurface {
 
         // Weather keeps evolving throughout loaded terrain instead of
         // repeatedly spending every update only on nearby 3x3 chunks.
-        if (level.getGameTime() % 120 == 0) rescanVisible(level);
+        if (level.getGameTime() % 180 == 0) rescanVisible(level);
 
         int remaining = MAX_COLUMNS_PER_TICK;
         while (remaining > 0 && !QUEUE.isEmpty()) {
@@ -103,7 +103,7 @@ public final class WeatherSurface {
         boolean thawing = climate.season == Season.PREWINTER ||
             climate.weather == WeatherKind.THAW ||
             (freezing && climate.weather == WeatherKind.CLEAR);
-        boolean snowCover = !thawing && (winter || (freezing && precipitation));
+        boolean snowCover = !thawing && precipitation && (winter || freezing);
         boolean freezeWater = !thawing && (winter || freezing);
 
         // Existing weather-created snow: melt or grow one layer at a time.
@@ -116,8 +116,13 @@ public final class WeatherSurface {
                 int next = Math.max(0, layers - (climate.weather == WeatherKind.THAW ? 2 : 1));
                 level.setBlock(ground, next == 0 ? Blocks.AIR.defaultBlockState()
                     : existing.setValue(SnowLayerBlock.LAYERS, next), 3);
-            } else if (snowCover && precipitation && layers < (winter ? 7 : 2)
-                && level.random.nextInt(2) == 0) {
+            } else if (winter && !precipitation && layers > 4
+                    && level.random.nextInt(3) == 0) {
+                // Blizzard snowpack settles slowly after the storm ends.
+                level.setBlock(ground, existing.setValue(SnowLayerBlock.LAYERS, layers - 1), 3);
+            } else if (snowCover && layers < (winter ?
+                    (climate.weather == WeatherKind.BLIZZARD ? 8 : 4) : 2)
+                && level.random.nextInt(climate.weather == WeatherKind.BLIZZARD ? 2 : 7) == 0) {
                 level.setBlock(ground, existing.setValue(SnowLayerBlock.LAYERS, layers + 1), 3);
             }
             return;
@@ -141,7 +146,7 @@ public final class WeatherSurface {
         // In winter an untouched/newly generated region becomes snowy as soon
         // as its chunk is processed, even if the player has never visited it.
         // During freezing, visible patches only form in precipitation events.
-        int chance = winter ? 1 : 3;
+        int chance = climate.weather == WeatherKind.BLIZZARD ? 2 : (winter ? 7 : 16);
         if (level.random.nextInt(chance) != 0) return;
         BlockState layer = WeatherBlocks.SEASONAL_SNOW.get().defaultBlockState();
         if (layer.canSurvive(level, air)) level.setBlock(air, layer, 3);
