@@ -31,19 +31,19 @@ public final class ForecastComputerRenderer implements BlockEntityRenderer<Forec
         pose.translate(0.5, 0.64, 0.5);
         pose.mulPose(Axis.YP.rotationDegrees(-state.getValue(ForecastComputerBlock.FACING).toYRot()));
         pose.translate(0, 0, 0.326);
-        pose.scale(0.0068f, -0.0068f, 0.0068f);
+        pose.scale(0.0047f, -0.0047f, 0.0047f);
 
         String[] lines = {
-            "DALDON WEATHER",
-            "SEASON: " + ClientWeatherState.season.id().toUpperCase(),
-            "NOW: " + ClientWeatherState.weather.id().toUpperCase(),
-            "NEXT: " + (ClientWeatherState.weatherLocked ? "MANUAL" : ClientWeatherState.next.id().toUpperCase()),
-            "ETA: " + remaining(be)
+            "DALDON WX",
+            "SEASON " + ClientWeatherState.season.id().toUpperCase(),
+            "NOW " + ClientWeatherState.weather.id().toUpperCase(),
+            "NEXT " + (ClientWeatherState.weatherLocked ? "MANUAL" : ClientWeatherState.next.id().toUpperCase()),
+            "ETA " + remaining(be)
         };
         for (int i = 0; i < lines.length; i++) {
             int shade = i == 0 ? 0xB7F6A8 : 0x83DB79;
             int x = -font.width(lines[i]) / 2;
-            font.drawInBatch(lines[i], x, -29 + i * 11, shade, false,
+            font.drawInBatch(lines[i], x, -35 + i * 14, shade, false,
                 pose.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, 0xF000F0);
         }
         pose.popPose();
