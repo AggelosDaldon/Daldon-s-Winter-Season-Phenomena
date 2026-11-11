@@ -26,6 +26,13 @@ public final class WeatherCommands {
             eventSet.then(Commands.literal(weather.id()).executes(ctx -> {
                 var server = ctx.getSource().getServer();
                 ClimateData data = ClimateData.get(server);
+                if (!weather.allowedIn(data.season)) {
+                    ctx.getSource().sendFailure(Component.literal(
+                        "[Daldon Weather] " + weather.id() +
+                        " is not allowed during " + data.season.id() +
+                        ". Change season first."));
+                    return 0;
+                }
                 data.setWeather(weather, server.overworld().getGameTime(), server.overworld().random);
                 data.weatherLocked = true;
                 data.setDirty();

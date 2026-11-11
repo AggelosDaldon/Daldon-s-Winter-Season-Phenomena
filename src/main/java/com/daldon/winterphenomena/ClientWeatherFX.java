@@ -60,23 +60,7 @@ public final class ClientWeatherFX {
             }
         }
 
-        // Play weather ambience locally, but the event itself is universal
-        // and synced from the server. Vanilla source audio is redistributable
-        // through Minecraft rather than copying sound files from other mods.
-        if (level.getGameTime() % 120 == 0) {
-            var pos = game.player.position();
-            if (weather == WeatherKind.BLIZZARD || weather == WeatherKind.THUNDERCLOUDS) {
-                level.playLocalSound(pos.x, pos.y, pos.z,
-                    SoundEvents.AMBIENT_SOUL_SAND_VALLEY_LOOP.value(), SoundSource.WEATHER,
-                    weather == WeatherKind.BLIZZARD ? 0.60f : 0.35f,
-                    weather == WeatherKind.BLIZZARD ? 0.77f : 0.90f, false);
-            } else if (weather == WeatherKind.SLEET || weather == WeatherKind.HAIL ||
-                       weather == WeatherKind.SNOW) {
-                level.playLocalSound(pos.x, pos.y, pos.z, SoundEvents.WEATHER_RAIN,
-                    SoundSource.WEATHER, weather == WeatherKind.HAIL ? 0.36f : 0.16f,
-                    weather == WeatherKind.HAIL ? 1.45f : 0.80f, false);
-            }
-        }
+        ClientWeatherAudio.tick(game, weather);
         // Tiny floating snow flecks all winter, even under an otherwise clear sky.
         if (ClientWeatherState.season == Season.WINTER && random.nextInt(3) == 0) {
             double x = game.player.getX() + random.nextInt(23) - 11;

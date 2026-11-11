@@ -74,13 +74,15 @@ public final class ClimateEngine {
     public static void changed(MinecraftServer server) {
         ClimateData data = ClimateData.get(server);
         ServerLevel level = server.overworld();
-        // Minecraft darkens cloud textures only for a real vanilla storm.
-        // Thunderclouds use that renderer so their clouds are dark, while
-        // our custom sleet/snow particles work independently of local biomes.
-        boolean vanillaRain = data.weather == WeatherKind.RAIN ||
-            data.weather == WeatherKind.THUNDERCLOUDS;
+        // Vanilla rain controls sky/ambient darkness. Use the native
+        // rain state on overcast events; client-side precipitation rendering
+        // must be suppressed separately for dry cloudy events.
+        boolean overcast = switch (data.weather) {
+            case CLEAR, THAW -> false;
+            default -> true;
+        };
         boolean vanillaThunder = data.weather == WeatherKind.THUNDERCLOUDS;
-        level.setWeatherParameters(0, 24000, vanillaRain, vanillaThunder);
+        level.setWeatherParameters(0, 24000, overcast, vanillaThunder);
         WeatherNetwork.broadcast(server);
         WeatherSurface.rescanVisible(level);
     }

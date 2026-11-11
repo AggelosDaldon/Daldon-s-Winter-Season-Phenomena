@@ -29,6 +29,17 @@ public final class ClimateData extends SavedData {
         d.nextWeatherTick = tag.getLong("nextWeatherTick");
         d.seasonLocked = tag.getBoolean("seasonLocked");
         d.weatherLocked = tag.getBoolean("weatherLocked");
+        // Repair states written by older builds (rain in winter, etc).
+        if (!d.weather.allowedIn(d.season)) {
+            d.weather = switch (d.season) {
+                case PREWINTER -> WeatherKind.CLEAR;
+                case FREEZING -> WeatherKind.SLEET;
+                case WINTER -> WeatherKind.SNOW;
+            };
+            d.weatherLocked = false;
+        }
+        if (!d.nextWeather.allowedIn(d.season))
+            d.nextWeather = WeatherKind.CLEAR;
         d.drizzleDensity = Math.max(1, Math.min(3, tag.contains("drizzleDensity") ? tag.getInt("drizzleDensity") : 1));
         return d;
     }
@@ -75,6 +86,8 @@ public final class ClimateData extends SavedData {
         setDirty();
     }
     public void setWeather(WeatherKind value, long now, RandomSource rng) {
+        if (!value.allowedIn(season)) throw new IllegalArgumentException(
+            value.id() + " is not valid in " + season.id());
         weather = value;
         scheduleWeather(now, rng);
         setDirty();
