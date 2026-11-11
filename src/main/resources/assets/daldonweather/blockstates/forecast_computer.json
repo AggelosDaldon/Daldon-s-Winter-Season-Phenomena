@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=south": {
+      "model": "daldonweather:block/forecast_computer"
+    },
+    "facing=north": {
+      "model": "daldonweather:block/forecast_computer",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "daldonweather:block/forecast_computer",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "daldonweather:block/forecast_computer",
+      "y": 270
+    }
+  }
+}

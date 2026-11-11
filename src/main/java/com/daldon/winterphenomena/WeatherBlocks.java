@@ -1,6 +1,10 @@
 package com.daldon.winterphenomena;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
@@ -35,6 +39,24 @@ public final class WeatherBlocks {
                 // WeatherSurface restores water when the world warms.
             }
         });
+
+    public static final DeferredRegister<Item> ITEMS =
+        DeferredRegister.create(ForgeRegistries.ITEMS, DaldonWeather.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+        DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, DaldonWeather.MOD_ID);
+
+    public static final RegistryObject<Block> FORECAST_COMPUTER = BLOCKS.register(
+        "forecast_computer",
+        () -> new ForecastComputerBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).strength(2.0f)));
+
+    public static final RegistryObject<Item> FORECAST_COMPUTER_ITEM = ITEMS.register(
+        "forecast_computer",
+        () -> new BlockItem(FORECAST_COMPUTER.get(), new Item.Properties()));
+
+    public static final RegistryObject<BlockEntityType<ForecastComputerBlockEntity>>
+        FORECAST_COMPUTER_ENTITY = BLOCK_ENTITIES.register("forecast_computer",
+        () -> BlockEntityType.Builder.of(ForecastComputerBlockEntity::new,
+            FORECAST_COMPUTER.get()).build(null));
 
     private WeatherBlocks() {}
 }

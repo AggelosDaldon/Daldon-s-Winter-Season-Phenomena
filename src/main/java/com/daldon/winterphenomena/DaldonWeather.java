@@ -10,6 +10,8 @@ public final class DaldonWeather {
 
     public DaldonWeather() {
         WeatherBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        WeatherBlocks.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        WeatherBlocks.BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
         WeatherNetwork.init();
     }
 }
