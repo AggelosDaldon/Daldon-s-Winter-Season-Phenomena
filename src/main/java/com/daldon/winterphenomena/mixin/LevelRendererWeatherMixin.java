@@ -3,6 +3,9 @@ package com.daldon.winterphenomena.mixin;
 import com.daldon.winterphenomena.ClientWeatherState;
 import com.daldon.winterphenomena.WeatherKind;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.Level;
 import net.minecraft.client.renderer.LightTexture;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,11 +22,23 @@ public abstract class LevelRendererWeatherMixin {
     @Inject(method = "renderSnowAndRain", at = @At("HEAD"), cancellable = true)
     private void daldon$hideVanillaPrecipitation(LightTexture light, float partialTick,
             double x, double y, double z, CallbackInfo ci) {
+        if (Minecraft.getInstance().level == null ||
+            Minecraft.getInstance().level.dimension() != Level.OVERWORLD) return;
         WeatherKind event = ClientWeatherState.weather;
         if (event != WeatherKind.RAIN &&
             !(event == WeatherKind.THUNDERCLOUDS &&
               ClientWeatherState.season == com.daldon.winterphenomena.Season.PREWINTER)) {
             ci.cancel();
         }
+    }
+
+    @Inject(method = "tickRain", at = @At("HEAD"), cancellable = true)
+    private void daldon$hideVanillaRainSplashesAndSounds(Camera camera, CallbackInfo ci) {
+        if (Minecraft.getInstance().level == null ||
+            Minecraft.getInstance().level.dimension() != Level.OVERWORLD) return;
+        WeatherKind event = ClientWeatherState.weather;
+        if (event != WeatherKind.RAIN &&
+            !(event == WeatherKind.THUNDERCLOUDS &&
+                ClientWeatherState.season == com.daldon.winterphenomena.Season.PREWINTER)) ci.cancel();
     }
 }
