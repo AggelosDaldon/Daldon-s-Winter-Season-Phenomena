@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="All Rights Reserved"
 [[mods]]
 modId="daldonweather"
-version="0.2.2"
+version="0.2.3"
 displayName="Daldon's Winter Season Phenomena"
 authors="Daldon"
 description='''Independent season and weather events for Minecraft Forge 1.20.1.'''

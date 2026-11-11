@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.daldon.winterphenomena.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "daldonweather.refmap.json",
+  "client": [
+    "LevelRendererWeatherMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

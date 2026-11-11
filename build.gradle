@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.daldon.winterphenomena'
-version = '0.2.2'
+version = '0.2.3'
 base { archivesName = 'daldon-winter-season-phenomena' }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -38,7 +38,8 @@ tasks.named('jar', Jar).configure {
        'Specification-Title': 'Daldons Winter Season Phenomena',
        'Specification-Vendor': 'Daldon',
        'Implementation-Title': project.name,
-       'Implementation-Version': project.version
+       'Implementation-Version': project.version,
+       'MixinConfigs': 'daldonweather.mixins.json'
     ])
     finalizedBy 'reobfJar'
 }
