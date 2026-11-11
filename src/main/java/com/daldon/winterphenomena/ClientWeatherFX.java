@@ -49,12 +49,15 @@ public final class ClientWeatherFX {
             boolean snow = weather == WeatherKind.SNOW || weather == WeatherKind.BLIZZARD
                 || (weather == WeatherKind.SLEET && i % 2 == 0);
             boolean hail = weather == WeatherKind.HAIL;
-            level.addParticle(hail ? ParticleTypes.ITEM_SNOWBALL :
-                    snow ? ParticleTypes.SNOWFLAKE : ParticleTypes.FALLING_WATER,
-                x, y, z,
-                weather == WeatherKind.BLIZZARD ? 0.26 : 0.005,
-                weather == WeatherKind.BLIZZARD ? -0.34 :
-                    hail ? -0.48 : snow ? -0.085 : -0.20, 0.0);
+            if (hail) {
+                // Small cuboid-ish ice sprite, with ground collisions and two bounces.
+                game.particleEngine.add(new HailStoneParticle(level, x, y, z));
+            } else {
+                level.addParticle(snow ? ParticleTypes.SNOWFLAKE : ParticleTypes.FALLING_WATER,
+                    x, y, z,
+                    weather == WeatherKind.BLIZZARD ? 0.26 : 0.005,
+                    weather == WeatherKind.BLIZZARD ? -0.34 : snow ? -0.085 : -0.20, 0.0);
+            }
         }
 
         // Play weather ambience locally, but the event itself is universal
