@@ -25,6 +25,7 @@ import org.joml.Matrix4f;
     value = Dist.CLIENT)
 public final class ClientSkyOverlay {
     private ClientSkyOverlay() {}
+    private static float currentOvercast = 0f;
 
     @SubscribeEvent
     public static void afterSky(RenderLevelStageEvent event) {
@@ -43,7 +44,11 @@ public final class ClientSkyOverlay {
             case HAIL -> 0.80f;
             default -> 0.0f;
         };
-        if (strength <= 0) return;
+        // Gentle blending rather than sudden changes between cloud events.
+        float step = 0.012f;
+        currentOvercast += Math.max(-step, Math.min(step, strength - currentOvercast));
+        strength = currentOvercast;
+        if (strength <= 0.003f) return;
         float red = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.11f : 0.31f;
         float green = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.13f : 0.34f;
         float blue = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.18f : 0.39f;

@@ -59,7 +59,9 @@ public final class ClimateData extends SavedData {
         season = value;
         // Moving into winter starts a worldwide snow event, not immediate snow cover.
         // During freezing use sleet; prewinter clears precipitation.
-        if (!weatherLocked) {
+        // Explicit season switching starts canonical weather and releases manual lock.
+        weatherLocked = false;
+        {
             weather = switch (value) {
                 case PREWINTER -> WeatherKind.CLEAR;
                 case FREEZING -> WeatherKind.SLEET;
