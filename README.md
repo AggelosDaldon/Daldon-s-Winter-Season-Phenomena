@@ -1,4 +1,4 @@
-# Daldon's Winter Season Phenomena — v0.2.0 experimental
+# Daldon's Winter Season Phenomena — v0.2.1 experimental
 
 Minecraft Forge 1.20.1 / Java 17. Always test on a backup world.
 
@@ -7,6 +7,16 @@ Minecraft Forge 1.20.1 / Java 17. Always test on a backup world.
 **Season** is global for the Overworld. **Event** is the currently active weather. Setting winter automatically starts snowfall, and setting freezing starts sleet. Snow cover accumulates gradually while snow/sleet/blizzard is active. A blizzard adds snow more quickly and more deeply; the extra depth settles slowly afterward. Hail damages exposed survival players. Thaw removes only the mod's temporary snow/ice.
 
 Every chunk that loads, including newly explored chunks, is processed using the global season. Unloaded chunks are not force-generated. The world-wide event state is shared among players; particles are rendered around each camera (as in vanilla weather), not persisted server-side in unobserved chunks.
+
+### Test changes v0.2.1
+- New original 16x16 pixel textures for CRT case, monitor and keyboard, with a particle texture fallback.
+- Smaller and better-spaced text on the live monitor.
+- Snow cover appears in sparse per-column increments over time, instead of whitening hundreds of blocks instantly.
+- Thaw and freezing are throttled. Chunk loading updates current season without instantly filling new regions.
+- Client camera-relative overcast cloud transform repaired.
+- Distant precipitation drawn as camera-relative world quads (30-102 blocks) plus close-up particles.
+- Hail uses tiny textured ice pellets that bounce on the ground before disappearing.
+- Atmospheric rendering has not been visually verified and may conflict with some shader mods.
 
 ### Newly added in v0.2.0
 
