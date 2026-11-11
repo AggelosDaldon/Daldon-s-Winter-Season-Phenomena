@@ -64,7 +64,7 @@ public final class ClientWeatherFX {
             var pos = game.player.position();
             if (weather == WeatherKind.BLIZZARD || weather == WeatherKind.THUNDERCLOUDS) {
                 level.playLocalSound(pos.x, pos.y, pos.z,
-                    SoundEvents.AMBIENT_SOUL_SAND_VALLEY_LOOP, SoundSource.WEATHER,
+                    SoundEvents.AMBIENT_SOUL_SAND_VALLEY_LOOP.value(), SoundSource.WEATHER,
                     weather == WeatherKind.BLIZZARD ? 0.60f : 0.35f,
                     weather == WeatherKind.BLIZZARD ? 0.77f : 0.90f, false);
             } else if (weather == WeatherKind.SLEET || weather == WeatherKind.HAIL ||
