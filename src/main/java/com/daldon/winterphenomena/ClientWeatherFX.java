@@ -80,7 +80,7 @@ public final class ClientWeatherFX {
 
         float dim = switch (ClientWeatherState.weather) {
             case CLOUDY -> 0.42f;
-            case THUNDERCLOUDS -> 0.78f;
+            case THUNDERCLOUDS -> 0.49f;
             case DRIZZLE -> 0.075f;
             case RAIN -> 0.20f;
             case SLEET -> 0.43f;
@@ -91,13 +91,13 @@ public final class ClientWeatherFX {
         };
         // Original cool, desaturated winter atmosphere; not an imported biome shader.
         float redTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
-            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.15f :
+            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.51f :
             ClientWeatherState.season == Season.WINTER ? 0.60f : 0.62f;
         float greenTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
-            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.18f :
+            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.56f :
             ClientWeatherState.season == Season.WINTER ? 0.67f : 0.68f;
         float blueTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
-            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.24f :
+            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.63f :
             ClientWeatherState.season == Season.WINTER ? 0.75f : 0.73f;
         if (ClientWeatherState.season == Season.WINTER) dim = Math.min(0.66f, dim + 0.08f);
         event.setRed(lerp(event.getRed(), redTarget, dim));

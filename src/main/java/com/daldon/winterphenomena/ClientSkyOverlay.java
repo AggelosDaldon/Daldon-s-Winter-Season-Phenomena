@@ -37,7 +37,7 @@ public final class ClientSkyOverlay {
             case CLOUDY -> 0.40f;
             case DRIZZLE -> 0.24f;
             case RAIN -> 0.54f;
-            case THUNDERCLOUDS -> 0.82f;
+            case THUNDERCLOUDS -> 0.47f;
             case SLEET -> 0.56f;
             case SNOW -> 0.36f;
             case BLIZZARD -> 0.75f;
@@ -49,9 +49,9 @@ public final class ClientSkyOverlay {
         currentOvercast += Math.max(-step, Math.min(step, strength - currentOvercast));
         strength = currentOvercast;
         if (strength <= 0.003f) return;
-        float red = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.11f : 0.31f;
-        float green = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.13f : 0.34f;
-        float blue = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.18f : 0.39f;
+        float red = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.285f : 0.31f;
+        float green = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.31f : 0.34f;
+        float blue = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.355f : 0.39f;
 
         // Position in camera-relative coordinates; leave depth testing enabled
         // so physical terrain rendered afterward is not obscured.
@@ -70,7 +70,7 @@ public final class ClientSkyOverlay {
         RenderSystem.disableCull();
         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
 
-        // Darkened upper sky base, tiled translucent cloud banks.
+        // Thunder Clouds shares the same distant cloud sheet as Cloudy, with only a modest\n        // increase in opacity and a slightly cooler grey. Avoid a near-black ceiling.\n        // Darkened upper sky base, tiled translucent cloud banks.
         // Two layers increase the impression of rolling overcast skies.
         for (int layer = 0; layer < 2; layer++) {
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
