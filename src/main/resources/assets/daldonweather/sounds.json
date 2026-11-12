@@ -1,0 +1,34 @@
+{
+  "thunder_wind_calm": {
+    "sounds": [
+      {
+        "name": "daldonweather:thunder/wind_calm",
+        "stream": true
+      }
+    ]
+  },
+  "thunder_wind_close": {
+    "sounds": [
+      {
+        "name": "daldonweather:thunder/wind_close",
+        "stream": true
+      }
+    ]
+  },
+  "thunder_rumble_deep": {
+    "sounds": [
+      {
+        "name": "daldonweather:thunder/rumble_deep",
+        "stream": false
+      }
+    ]
+  },
+  "thunder_rumble_rolling": {
+    "sounds": [
+      {
+        "name": "daldonweather:thunder/rumble_rolling",
+        "stream": false
+      }
+    ]
+  }
+}

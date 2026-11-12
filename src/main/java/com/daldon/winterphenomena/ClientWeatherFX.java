@@ -25,6 +25,7 @@ public final class ClientWeatherFX {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft game = Minecraft.getInstance();
         if (game.level == null || game.player == null) {
+            ClientWeatherAudio.stopAll(game);
             ClientWeatherState.reset();
             return;
         }

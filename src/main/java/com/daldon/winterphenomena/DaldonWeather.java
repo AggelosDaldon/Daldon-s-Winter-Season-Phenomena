@@ -9,6 +9,7 @@ public final class DaldonWeather {
     public static final String MOD_ID = "daldonweather";
 
     public DaldonWeather() {
+        WeatherSounds.SOUNDS.register(FMLJavaModLoadingContext.get().getModEventBus());
         WeatherBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         WeatherBlocks.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         WeatherBlocks.BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
