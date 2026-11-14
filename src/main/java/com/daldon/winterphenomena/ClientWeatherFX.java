@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FogType;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.TickEvent;
@@ -81,9 +82,10 @@ public final class ClientWeatherFX {
         if (event.getCamera().getFluidInCamera() != FogType.NONE) return;
 
         // Layer A: only the shared event palette; density/distance stay in Layer B.
-        event.setRed(AtmosphereLayerA.fogR(event.getRed()));
-        event.setGreen(AtmosphereLayerA.fogG(event.getGreen()));
-        event.setBlue(AtmosphereLayerA.fogB(event.getBlue()));
+        Vec3 color = AtmosphereLayerA.fog(new Vec3(event.getRed(), event.getGreen(), event.getBlue()));
+        event.setRed((float)color.x);
+        event.setGreen((float)color.y);
+        event.setBlue((float)color.z);
     }
 
     private static float lerp(float from, float to, float alpha) {
