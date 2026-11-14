@@ -19,6 +19,8 @@ public final class ClientWeatherAudio {
     private static WeatherKind kind;
     private static int rumbleCountdown = 280;
     private static final RandomSource RNG = RandomSource.create();
+    // Master cap for all mod-controlled ambient sounds (70% of previous levels).
+    private static final float AMBIENT_VOLUME = 0.70f;
 
     private ClientWeatherAudio() {}
 
@@ -28,8 +30,8 @@ public final class ClientWeatherAudio {
             active = null;
             if (kind != current || thunderCalm == null || thunderCalm.isStopped()) {
                 stopStorm(minecraft);
-                thunderCalm = new LoopSound(WeatherSounds.THUNDER_WIND_CALM.get(), .29f, 1f);
-                thunderClose = new LoopSound(WeatherSounds.THUNDER_WIND_CLOSE.get(), .18f, .98f);
+                thunderCalm = new LoopSound(WeatherSounds.THUNDER_WIND_CALM.get(), .29f * AMBIENT_VOLUME, 1f);
+                thunderClose = new LoopSound(WeatherSounds.THUNDER_WIND_CLOSE.get(), .18f * AMBIENT_VOLUME, .98f);
                 minecraft.getSoundManager().play(thunderCalm);
                 minecraft.getSoundManager().play(thunderClose);
                 rumbleCountdown = 180 + RNG.nextInt(220);
@@ -40,7 +42,7 @@ public final class ClientWeatherAudio {
                     : WeatherSounds.THUNDER_RUMBLE_ROLLING.get();
                 // These are distant rolling rumbles, never a replacement for a lightning bolt.
                 minecraft.getSoundManager().play(new RumbleSound(rumble,
-                    .42f + RNG.nextFloat() * .14f, .93f + RNG.nextFloat() * .12f));
+                    (.42f + RNG.nextFloat() * .14f) * AMBIENT_VOLUME, .93f + RNG.nextFloat() * .12f));
                 rumbleCountdown = 340 + RNG.nextInt(460);
             }
             kind = current;
@@ -70,7 +72,7 @@ public final class ClientWeatherAudio {
                 case BLIZZARD -> .62f;
                 default -> .35f;
             };
-            active = new LoopSound(nextSound,volume,current==WeatherKind.BLIZZARD?.80f:1f);
+            active = new LoopSound(nextSound,volume * AMBIENT_VOLUME,current==WeatherKind.BLIZZARD?.80f:1f);
             minecraft.getSoundManager().play(active);
         }
         kind = current;
