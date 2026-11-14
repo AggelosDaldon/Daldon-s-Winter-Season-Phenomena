@@ -15,6 +15,7 @@ import net.minecraft.util.RandomSource;
 public final class ClientWeatherAudio {
     private static LoopSound active;
     private static LoopSound thunderCalm;
+    private static LoopSound thunderAmbient;
     private static LoopSound thunderClose;
     private static WeatherKind kind;
     private static int rumbleCountdown = 280;
@@ -31,8 +32,10 @@ public final class ClientWeatherAudio {
             if (kind != current || thunderCalm == null || thunderCalm.isStopped()) {
                 stopStorm(minecraft);
                 thunderCalm = new LoopSound(WeatherSounds.THUNDER_WIND_CALM.get(), .29f * AMBIENT_VOLUME, 1f);
+                thunderAmbient = new LoopSound(WeatherSounds.THUNDER_AMBIENT_CLOUDS.get(), .22f * AMBIENT_VOLUME, 1f);
                 thunderClose = new LoopSound(WeatherSounds.THUNDER_WIND_CLOSE.get(), .18f * AMBIENT_VOLUME, .98f);
                 minecraft.getSoundManager().play(thunderCalm);
+                minecraft.getSoundManager().play(thunderAmbient);
                 minecraft.getSoundManager().play(thunderClose);
                 rumbleCountdown = 180 + RNG.nextInt(220);
             }
@@ -87,8 +90,10 @@ public final class ClientWeatherAudio {
 
     private static void stopStorm(Minecraft game) {
         if (thunderCalm != null) game.getSoundManager().stop(thunderCalm);
+        if (thunderAmbient != null) game.getSoundManager().stop(thunderAmbient);
         if (thunderClose != null) game.getSoundManager().stop(thunderClose);
         thunderCalm = null;
+        thunderAmbient = null;
         thunderClose = null;
     }
 
