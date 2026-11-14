@@ -27,11 +27,13 @@ public final class ClientWeatherFX {
         if (game.level == null || game.player == null) {
             ClientWeatherAudio.stopAll(game);
             ClientWeatherState.reset();
+            AtmosphereLayerA.reset();
             return;
         }
         ClientLevel level = game.level;
         if (level.dimension() != Level.OVERWORLD || game.isPaused()) return;
 
+        AtmosphereLayerA.tick();
         WeatherKind weather = ClientWeatherState.weather;
         int particles = switch (weather) {
             case SLEET -> 38;
@@ -78,31 +80,10 @@ public final class ClientWeatherFX {
         if (game.level == null || game.level.dimension() != Level.OVERWORLD) return;
         if (event.getCamera().getFluidInCamera() != FogType.NONE) return;
 
-        float dim = switch (ClientWeatherState.weather) {
-            case CLOUDY -> 0.42f;
-            case THUNDERCLOUDS -> 0.49f;
-            case DRIZZLE -> 0.075f;
-            case RAIN -> 0.20f;
-            case SLEET -> 0.43f;
-            case SNOW -> 0.20f;
-            case BLIZZARD -> 0.62f;
-            case HAIL -> 0.64f;
-            default -> 0.0f;
-        };
-        // Original cool, desaturated winter atmosphere; not an imported biome shader.
-        float redTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
-            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.51f :
-            ClientWeatherState.season == Season.WINTER ? 0.60f : 0.62f;
-        float greenTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
-            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.56f :
-            ClientWeatherState.season == Season.WINTER ? 0.67f : 0.68f;
-        float blueTarget = (ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ||
-            ClientWeatherState.weather == WeatherKind.HAIL) ? 0.63f :
-            ClientWeatherState.season == Season.WINTER ? 0.75f : 0.73f;
-        if (ClientWeatherState.season == Season.WINTER) dim = Math.min(0.66f, dim + 0.08f);
-        event.setRed(lerp(event.getRed(), redTarget, dim));
-        event.setGreen(lerp(event.getGreen(), greenTarget, dim));
-        event.setBlue(lerp(event.getBlue(), blueTarget, dim));
+        // Layer A: only the shared event palette; density/distance stay in Layer B.
+        event.setRed(AtmosphereLayerA.fogR(event.getRed()));
+        event.setGreen(AtmosphereLayerA.fogG(event.getGreen()));
+        event.setBlue(AtmosphereLayerA.fogB(event.getBlue()));
     }
 
     private static float lerp(float from, float to, float alpha) {
