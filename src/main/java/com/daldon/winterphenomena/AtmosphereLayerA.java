@@ -13,7 +13,7 @@ public final class AtmosphereLayerA {
     public record Palette(float darkness, int sky, int clouds, int fog, float overcast) {}
 
     private static final Palette CLEAR = new Palette(0f, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0f);
-    private static float darkness, overcast;
+    private static float darkness, overcast, snowGrey;
     private static float skyR = 1f, skyG = 1f, skyB = 1f;
     private static float cloudR = 1f, cloudG = 1f, cloudB = 1f;
     private static float fogR = 1f, fogG = 1f, fogB = 1f;
@@ -38,6 +38,7 @@ public final class AtmosphereLayerA {
         // ~2-3 seconds for a full weather transition at 20 TPS.
         float speed = .022f;
         darkness = move(darkness, p.darkness(), speed);
+        snowGrey = move(snowGrey, (ClientWeatherState.weather == WeatherKind.SNOW || ClientWeatherState.weather == WeatherKind.BLIZZARD) ? .94f : 0f, speed);
         overcast = move(overcast, p.overcast(), speed);
         skyR = move(skyR, channel(p.sky(),16), speed);
         skyG = move(skyG, channel(p.sky(),8), speed);
@@ -53,6 +54,7 @@ public final class AtmosphereLayerA {
     public static void reset() {
         darkness = 0f;
         overcast = 0f;
+        snowGrey = 0f;
         skyR = skyG = skyB = cloudR = cloudG = cloudB = fogR = fogG = fogB = 1f;
     }
 
@@ -75,17 +77,29 @@ public final class AtmosphereLayerA {
 
     public static Vec3 sky(Vec3 vanilla) {
         if (vanilla == null) return null;
-        return new Vec3(shade((float)vanilla.x, skyR, .48f),
-                        shade((float)vanilla.y, skyG, .48f),
-                        shade((float)vanilla.z, skyB, .48f));
+        Vec3 neutral = neutralize(vanilla);
+        return new Vec3(shade((float)neutral.x, skyR, .48f),
+                        shade((float)neutral.y, skyG, .48f),
+                        shade((float)neutral.z, skyB, .48f));
     }
     public static Vec3 clouds(Vec3 vanilla) {
         if (vanilla == null) return null;
-        return new Vec3(shade((float)vanilla.x, cloudR, .77f),
-                        shade((float)vanilla.y, cloudG, .77f),
-                        shade((float)vanilla.z, cloudB, .77f));
+        Vec3 neutral = neutralize(vanilla);
+        return new Vec3(shade((float)neutral.x, cloudR, .77f),
+                        shade((float)neutral.y, cloudG, .77f),
+                        shade((float)neutral.z, cloudB, .77f));
     }
-    public static float fogR(float value) { return shade(value, fogR, .60f); }
-    public static float fogG(float value) { return shade(value, fogG, .60f); }
-    public static float fogB(float value) { return shade(value, fogB, .60f); }
+    private static Vec3 neutralize(Vec3 vanilla) {
+        double grey = vanilla.x * .299 + vanilla.y * .587 + vanilla.z * .114;
+        return new Vec3(vanilla.x + (grey - vanilla.x) * snowGrey,
+                        vanilla.y + (grey - vanilla.y) * snowGrey,
+                        vanilla.z + (grey - vanilla.z) * snowGrey);
+    }
+
+    public static Vec3 fog(Vec3 vanilla) {
+        Vec3 neutral = neutralize(vanilla);
+        return new Vec3(shade((float)neutral.x, fogR, .60f),
+                        shade((float)neutral.y, fogG, .60f),
+                        shade((float)neutral.z, fogB, .60f));
+    }
 }
