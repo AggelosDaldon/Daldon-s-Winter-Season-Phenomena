@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "daldonweather.refmap.json",
   "client": [
-    "LevelRendererWeatherMixin"
+    "LevelRendererWeatherMixin",
+    "ClientLevelAtmosphereMixin"
   ],
   "injectors": {
     "defaultRequire": 1
