@@ -25,7 +25,6 @@ import org.joml.Matrix4f;
     value = Dist.CLIENT)
 public final class ClientSkyOverlay {
     private ClientSkyOverlay() {}
-    private static float currentOvercast = 0f;
 
     @SubscribeEvent
     public static void afterSky(RenderLevelStageEvent event) {
@@ -33,25 +32,12 @@ public final class ClientSkyOverlay {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null || mc.level.dimension() != Level.OVERWORLD) return;
 
-        float strength = switch (ClientWeatherState.weather) {
-            case CLOUDY -> 0.40f;
-            case DRIZZLE -> 0.24f;
-            case RAIN -> 0.54f;
-            case THUNDERCLOUDS -> 0.47f;
-            case SLEET -> 0.56f;
-            case SNOW -> 0.36f;
-            case BLIZZARD -> 0.75f;
-            case HAIL -> 0.80f;
-            default -> 0.0f;
-        };
-        // Gentle blending rather than sudden changes between cloud events.
-        float step = 0.012f;
-        currentOvercast += Math.max(-step, Math.min(step, strength - currentOvercast));
-        strength = currentOvercast;
+        // Same per-event palette controls both the vanilla clouds and our cloud bank.
+        float strength = AtmosphereLayerA.overcast();
         if (strength <= 0.003f) return;
-        float red = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.285f : 0.31f;
-        float green = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.31f : 0.34f;
-        float blue = ClientWeatherState.weather == WeatherKind.THUNDERCLOUDS ? 0.355f : 0.39f;
+        float red = AtmosphereLayerA.cloudRed();
+        float green = AtmosphereLayerA.cloudGreen();
+        float blue = AtmosphereLayerA.cloudBlue();
 
         // Position in camera-relative coordinates; leave depth testing enabled
         // so physical terrain rendered afterward is not obscured.
