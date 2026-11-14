@@ -15,6 +15,7 @@ public final class WeatherSounds {
         return SOUNDS.register(name, () ->
             SoundEvent.createVariableRangeEvent(new ResourceLocation(DaldonWeather.MOD_ID, name)));
     }
+    public static final RegistryObject<SoundEvent> THUNDER_AMBIENT_CLOUDS = register("thunder_ambient_clouds");
     public static final RegistryObject<SoundEvent> THUNDER_WIND_CALM = register("thunder_wind_calm");
     public static final RegistryObject<SoundEvent> THUNDER_WIND_CLOSE = register("thunder_wind_close");
     public static final RegistryObject<SoundEvent> THUNDER_RUMBLE_DEEP = register("thunder_rumble_deep");
