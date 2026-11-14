@@ -30,5 +30,13 @@
         "stream": false
       }
     ]
+  },
+  "thunder_ambient_clouds": {
+    "sounds": [
+      {
+        "name": "daldonweather:thunder/ambient_clouds",
+        "stream": true
+      }
+    ]
   }
 }
