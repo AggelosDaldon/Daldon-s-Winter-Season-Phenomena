@@ -72,6 +72,31 @@ public final class ClientWeatherFX {
         }
     }
 
+    /**
+     * Mild atmospheric horizon haze for weather without dedicated dense fog.
+     * Only the far end of the view fades, preserving nearby scenery.
+     * Do not interfere with underwater, lava or powder-snow fog.
+     */
+    @SubscribeEvent
+    public static void horizonFog(ViewportEvent.RenderFog event) {
+        Minecraft game = Minecraft.getInstance();
+        if (game.level == null || game.level.dimension() != Level.OVERWORLD) return;
+        if (event.getCamera().getFluidInCamera() != FogType.NONE) return;
+        float factor = switch (ClientWeatherState.weather) {
+            case CLEAR, THAW -> 0.97f;
+            case DRIZZLE, CLOUDY, SNOW -> 0.91f;
+            case RAIN, THUNDERCLOUDS, SLEET -> 0.88f;
+            // Preserve existing naturally heavier fog for blizzard and hail.
+            case BLIZZARD, HAIL -> 1.0f;
+        };
+        if (factor >= 1.0f) return;
+        float far = event.getFarPlaneDistance();
+        if (far <= 0f) return;
+        event.setNearPlaneDistance(Math.min(event.getNearPlaneDistance(), far * factor * 0.72f));
+        event.setFarPlaneDistance(far * factor);
+        event.setCanceled(true);
+    }
+
     @SubscribeEvent
     public static void fog(ViewportEvent.ComputeFogColor event) {
         Minecraft game = Minecraft.getInstance();
